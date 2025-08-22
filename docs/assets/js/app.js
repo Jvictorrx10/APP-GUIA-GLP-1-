@@ -91,6 +91,9 @@ class HashRouter {
       // Configurar eventos da sidebar
       this.setupSidebarEvents();
       
+      // Configurar eventos globais dos botões
+      this.setupGlobalEvents();
+      
       // Esconder loading
       this.hideLoading();
       
@@ -104,6 +107,90 @@ class HashRouter {
         </div>
       `;
     }
+  }
+  
+  setupGlobalEvents() {
+    // Event delegation para botões de checklist
+    document.addEventListener('click', async (e) => {
+      // Botões de checklist
+      if (e.target.matches('[data-checklist-item]')) {
+        e.preventDefault();
+        const checklistId = e.target.getAttribute('data-checklist-id');
+        const itemId = e.target.getAttribute('data-checklist-item');
+        
+        if (checklistId && itemId) {
+          try {
+            const result = await window.glp1State.toggleChecklistItem(checklistId, itemId);
+            if (result.success) {
+              // Atualizar visual do botão
+              e.target.classList.toggle('completed', result.checked);
+              
+              // Mostrar toast de sucesso
+              if (result.checked) {
+                window.showToast(`+${result.points} pontos! Item marcado com sucesso.`, 'success');
+              } else {
+                window.showToast('Item desmarcado.', 'info');
+              }
+              
+              // Recarregar página para atualizar contadores
+              setTimeout(() => window.router.handleRoute(), 500);
+            } else {
+              window.showToast(result.message || 'Erro ao marcar item.', 'error');
+            }
+          } catch (error) {
+            console.error('Erro ao toggle checklist item:', error);
+            window.showToast('Erro interno. Tente novamente.', 'error');
+          }
+        }
+      }
+      
+      // Botões de marcar aula como lida
+      if (e.target.matches('[data-lesson-id]')) {
+        e.preventDefault();
+        const lessonId = e.target.getAttribute('data-lesson-id');
+        
+        if (lessonId) {
+          try {
+            const result = await window.glp1State.toggleLessonRead(lessonId);
+            if (result.success) {
+              // Atualizar visual do botão
+              if (result.read) {
+                e.target.textContent = '✓ Marcado como Lido';
+                e.target.classList.add('completed');
+                window.showToast(`+${result.points} pontos! Aula marcada como lida.`, 'success');
+              } else {
+                e.target.textContent = 'Marcar como Lido (+5 pontos)';
+                e.target.classList.remove('completed');
+                window.showToast('Aula desmarcada.', 'info');
+              }
+              
+              // Recarregar página para atualizar contadores
+              setTimeout(() => window.router.handleRoute(), 500);
+            } else {
+              window.showToast(result.message || 'Erro ao marcar aula.', 'error');
+            }
+          } catch (error) {
+            console.error('Erro ao toggle lesson read:', error);
+            window.showToast('Erro interno. Tente novamente.', 'error');
+          }
+        }
+      }
+      
+      // Botão de configurações/reset
+      if (e.target.matches('[data-action="reset"]') || e.target.closest('[data-action="reset"]')) {
+        e.preventDefault();
+        if (confirm('Tem certeza que deseja resetar todos os dados? Esta ação não pode ser desfeita.')) {
+          try {
+            await window.glp1State.hardReset();
+            window.showToast('Dados resetados com sucesso!', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+          } catch (error) {
+            console.error('Erro ao resetar dados:', error);
+            window.showToast('Erro ao resetar dados.', 'error');
+          }
+        }
+      }
+    });
   }
   
   showLoading() {
@@ -255,7 +342,7 @@ window.navigate = function(path) {
 // Inicializar aplicação
 const router = new HashRouter();
 
-// Registrar rotas (serão implementadas nas próximas fases)
+// Registrar rotas
 router.addRoute('Home', () => import('./pages/Home.js').then(m => m.default()));
 router.addRoute('Checklists', () => import('./pages/Checklists.js').then(m => m.default()));
 router.addRoute('MicroAulas', () => import('./pages/MicroAulas.js').then(m => m.default()));
@@ -266,12 +353,16 @@ router.addRoute('Recursos', () => import('./pages/Recursos.js').then(m => m.defa
 router.addRoute('Pro', () => import('./pages/Pro.js').then(m => m.default()));
 
 // Inicializar estado da aplicação
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('Inicializando GLP-1 Natural App...');
   
   // Inicializar estado local
   const initialState = initializeApp();
   console.log('Estado inicial:', initialState);
+  
+  // Disponibilizar estado globalmente
+  const { default: localState } = await import('./localState.js');
+  window.glp1State = localState;
   
   // Inicializar roteador
   router.handleRoute();

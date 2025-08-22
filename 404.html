@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLP-1 Natural - Redirecionando...</title>
+    <script>
+        // Redirecionar para a página principal com hash router
+        const path = window.location.pathname.replace(/^\//, '');
+        const hash = path ? `#/${path}` : '#/Home';
+        window.location.replace(`/${hash}`);
+    </script>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui;">
+        <div style="text-align: center;">
+            <h1>Redirecionando...</h1>
+            <p>Se não for redirecionado automaticamente, <a href="/#/Home">clique aqui</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
+

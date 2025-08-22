@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLP-1 Natural - Sua Jornada de Transformação</title>
+    <meta name="description" content="Aplicativo de acompanhamento para ativação natural do GLP-1 e emagrecimento sustentável">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#FFD700">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="GLP-1 Natural">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iI0ZGRDcwMCIvPgo8cGF0aCBkPSJNOCAxMkwxNiA4TDI0IDEyVjI0SDE2VjE2SDhWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="./assets/css/global.css">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="./manifest.webmanifest">
+</head>
+<body>
+    <div id="app">
+        <div class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-logo">
+                    <div class="loading-spinner"></div>
+                </div>
+                <h1>GLP-1 Natural</h1>
+                <p>Carregando sua jornada...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./assets/js/app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
+

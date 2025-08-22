@@ -1,4 +1,3 @@
-// Página Checklists
 import { loadState, getTodayCompletedCount } from '../localState.js';
 import { ChecklistItem, setupChecklistEvents } from '../components/ChecklistItem.js';
 
@@ -58,6 +57,23 @@ const checklistsData = {
   }
 };
 
+function getUrlParams() {
+  const hash = window.location.hash;
+  const [, queryString] = hash.split('?');
+  
+  if (!queryString) return {};
+  
+  const params = {};
+  queryString.split('&').forEach(param => {
+    const [key, value] = param.split('=');
+    if (key) {
+      params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+    }
+  });
+  
+  return params;
+}
+
 export default async function Checklists() {
   // Obter parâmetros da URL
   const params = getUrlParams();
@@ -70,7 +86,7 @@ export default async function Checklists() {
   // Calcular progresso para cada tab
   function getTabProgress(tabKey) {
     const items = checklistsData[tabKey].items;
-    const completed = items.filter(item => window.glp1State.isChecked(tabKey, item.id)).length;
+    const completed = items.filter(item => window.glp1State?.isChecked(tabKey, item.id) || false).length;
     return { completed, total: items.length };
   }
   
@@ -98,142 +114,190 @@ export default async function Checklists() {
           <div class="tabs-container" style="
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.25rem;
+            gap: 0.5rem;
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             padding: 0.25rem;
             border-radius: 16px;
-            margin-bottom: 2rem;
           ">
-            ${Object.entries(checklistsData).map(([key, data]) => {
+            ${Object.entries(checklistsData).map(([key, checklist]) => {
               const progress = getTabProgress(key);
               const isActive = key === requestedChecklist;
               
               return `
                 <button 
-                  class="tab-button ${isActive ? 'active' : ''}"
-                  data-tab="${key}"
+                  onclick="window.navigate('Checklists?checklist=${key}')"
+                  class="tab-button"
                   style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0.5rem;
                     padding: 1rem;
                     border: none;
                     border-radius: 12px;
-                    background: ${isActive ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1))' : 'transparent'};
-                    color: #374151;
+                    background: ${isActive ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' : 'transparent'};
+                    color: ${isActive ? 'white' : '#4b5563'};
+                    font-weight: 600;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     text-align: center;
-                    ${isActive ? 'box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);' : ''}
                   "
                 >
-                  <span style="font-size: 1.25rem;">${data.icon}</span>
-                  <span style="font-weight: 500; font-size: 0.75rem; line-height: 1.2;">
-                    ${data.title}
-                  </span>
-                  <span class="badge badge-outline" style="font-size: 0.75rem;">
-                    ${progress.completed}/${progress.total}
-                  </span>
+                  <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${checklist.icon}</div>
+                  <div style="font-size: 0.875rem; margin-bottom: 0.25rem;">${checklist.title}</div>
+                  <div style="font-size: 0.75rem; opacity: 0.8;">${progress.completed}/${progress.total}</div>
                 </button>
               `;
             }).join('')}
           </div>
         </div>
 
-        <!-- Tab Content -->
-        <div id="tab-content">
-          ${renderTabContent(requestedChecklist, checklistsData[requestedChecklist])}
-        </div>
-        
+        <!-- Checklist Content -->
+        ${renderChecklistContent(requestedChecklist, checklistsData[requestedChecklist])}
       </div>
     </div>
-    
-    <script>
-      // Setup tab switching
-      document.addEventListener('click', (e) => {
-        if (e.target.closest('.tab-button')) {
-          const button = e.target.closest('.tab-button');
-          const tabKey = button.dataset.tab;
-          
-          // Update URL
-          window.location.hash = '#/Checklists?checklist=' + tabKey;
-        }
-      });
-      
-      // Setup checklist events
-      ${setupChecklistEvents.toString()}
-      setupChecklistEvents();
-    </script>
   `;
 }
 
-function renderTabContent(tabKey, tabData) {
-  const progress = getTabProgress(tabKey);
+function renderChecklistContent(checklistKey, checklist) {
+  const progress = checklist.items.filter(item => window.glp1State?.isChecked(checklistKey, item.id) || false).length;
   
   return `
-    <div class="animate-fade-in">
-      <!-- Tab Header -->
-      <div class="card text-center mb-6">
+    <div class="card animate-fade-in">
+      <!-- Checklist Header -->
+      <div class="text-center mb-8">
         <div style="
-          display: inline-flex;
-          padding: 1rem;
-          border-radius: 16px;
-          background: linear-gradient(135deg, ${getGradientColors(tabData.color)});
-          box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-          margin-bottom: 1rem;
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, #10b981, #059669);
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1.5rem;
+          font-size: 2rem;
+          box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
         ">
-          <span style="font-size: 2rem;">${tabData.icon}</span>
+          ${checklist.icon}
         </div>
-        <h2 class="title-font" style="font-size: 1.875rem; color: #111827; margin-bottom: 0.5rem;">
-          ${tabData.title}
+        
+        <h2 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
+          ${checklist.title}
         </h2>
-        <p style="color: #4b5563;">
-          ${progress.completed} de ${progress.total} itens concluídos
+        
+        <p style="color: #6b7280; margin-bottom: 1rem;">
+          ${progress} de ${checklist.items.length} itens concluídos
         </p>
+        
+        <!-- Progress Bar -->
+        <div class="progress-bar" style="max-width: 300px; margin: 0 auto;">
+          <div class="progress-bar-fill" style="width: ${(progress / checklist.items.length) * 100}%;"></div>
+        </div>
       </div>
 
-      <!-- Items -->
+      <!-- Checklist Items -->
       <div class="space-y-4">
-        ${tabData.items.map((item, index) => 
-          ChecklistItem({ item, listId: tabKey, index, lessonId: item.lessonId })
-        ).join('')}
+        ${checklist.items.map(item => renderChecklistItem(checklistKey, item)).join('')}
       </div>
     </div>
   `;
 }
 
-function getTabProgress(tabKey) {
-  const items = checklistsData[tabKey].items;
-  const completed = items.filter(item => window.glp1State?.isChecked(tabKey, item.id) || false).length;
-  return { completed, total: items.length };
-}
-
-function getGradientColors(gradient) {
-  const gradients = {
-    "from-green-500 to-emerald-600": "#10b981, #059669",
-    "from-blue-500 to-cyan-600": "#3b82f6, #0891b2",
-    "from-purple-500 to-pink-600": "#8b5cf6, #db2777",
-    "from-orange-500 to-red-600": "#f97316, #dc2626"
-  };
-  return gradients[gradient] || "#3b82f6, #1d4ed8";
-}
-
-function getUrlParams() {
-  const hash = window.location.hash;
-  const [, queryString] = hash.split('?');
+function renderChecklistItem(checklistKey, item) {
+  const isChecked = window.glp1State?.isChecked(checklistKey, item.id) || false;
+  const pointsColor = item.type === 'core' ? '#3b82f6' : '#f59e0b';
   
-  if (!queryString) return {};
-  
-  const params = {};
-  queryString.split('&').forEach(param => {
-    const [key, value] = param.split('=');
-    if (key) {
-      params[decodeURIComponent(key)] = decodeURIComponent(value || '');
-    }
-  });
-  
-  return params;
+  return `
+    <div class="card" style="
+      border: 2px solid ${isChecked ? '#10b981' : '#e5e7eb'};
+      background: ${isChecked ? 'rgba(16, 185, 129, 0.05)' : 'white'};
+      transition: all 0.3s ease;
+    ">
+      <div style="display: flex; align-items: flex-start; gap: 1rem;">
+        <!-- Checkbox -->
+        <button 
+          data-checklist-id="${checklistKey}"
+          data-checklist-item="${item.id}"
+          class="btn-checkbox ${isChecked ? 'completed' : ''}"
+          style="
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+          "
+        >
+          ${isChecked ? '✓' : ''}
+        </button>
+        
+        <!-- Content -->
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <h3 style="
+              font-size: 1rem;
+              font-weight: 600;
+              color: ${isChecked ? '#059669' : '#111827'};
+              flex: 1;
+            ">
+              ${item.text}
+            </h3>
+            
+            <!-- Points Badge -->
+            <div class="badge" style="
+              background: ${pointsColor};
+              color: white;
+              font-size: 0.75rem;
+              padding: 0.25rem 0.5rem;
+            ">
+              ${item.points}pts
+            </div>
+          </div>
+          
+          <!-- Hint -->
+          ${item.hint ? `
+            <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+              <button 
+                class="btn-hint"
+                onclick="this.nextElementSibling.classList.toggle('hidden')"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  flex-shrink: 0;
+                  font-size: 0.75rem;
+                  margin-top: 0.125rem;
+                "
+              >
+                💡
+              </button>
+              <div class="hint-content hidden">
+                ${item.hint}
+              </div>
+            </div>
+          ` : ''}
+          
+          <!-- Lesson Link -->
+          ${item.lessonId ? `
+            <div style="margin-top: 0.75rem;">
+              <a 
+                href="#/Aula?id=${item.lessonId}" 
+                style="
+                  color: #3b82f6;
+                  text-decoration: none;
+                  font-size: 0.875rem;
+                  font-weight: 500;
+                  border-bottom: 1px solid transparent;
+                  transition: border-color 0.2s ease;
+                "
+                onmouseover="this.style.borderColor='#3b82f6'"
+                onmouseout="this.style.borderColor='transparent'"
+              >
+                📖 Ver micro-aula relacionada
+              </a>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
 }
 

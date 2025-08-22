@@ -1,4 +1,3 @@
-// Página Aula
 import { loadState, toggleLessonRead } from '../localState.js';
 
 // Dados completos das micro-aulas
@@ -66,7 +65,7 @@ export default async function Aula() {
   }
   
   const state = loadState();
-  const isCompleted = state.lessons[lessonId.toString()]?.read || false;
+  const isCompleted = state.lessons?.[lessonId.toString()]?.read || false;
 
   return `
     <div style="min-height: 100vh; background: linear-gradient(135deg, #f8fafc 0%, rgba(59, 130, 246, 0.1) 50%, rgba(99, 102, 241, 0.1) 100%); padding: 1rem;">
@@ -78,231 +77,108 @@ export default async function Aula() {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #4b5563;
+            color: #3b82f6;
             text-decoration: none;
-            transition: color 0.2s ease;
-          " onmouseover="this.style.color='#111827'" onmouseout="this.style.color='#4b5563'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15,18 9,12 15,6"/>
-            </svg>
-            <span>Voltar para todas as aulas</span>
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+          " onmouseover="this.style.backgroundColor='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.backgroundColor='transparent'">
+            ← Voltar para todas as aulas
           </a>
         </div>
 
         <!-- Lesson Content -->
-        <div class="card animate-fade-in" style="padding: 3rem 2rem;">
-          
-          <!-- Header -->
-          <header class="text-center space-y-4" style="margin-bottom: 2rem;">
-            <div style="
-              display: inline-flex;
-              align-items: center;
-              gap: 0.5rem;
-              background: rgba(59, 130, 246, 0.1);
-              color: #1d4ed8;
-              padding: 0.5rem 1rem;
-              border-radius: 9999px;
-              font-size: 0.875rem;
-              font-weight: 500;
-              margin-bottom: 1rem;
-            ">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-              </svg>
-              <span>${lesson.chapter}</span>
+        <div class="card animate-fade-in">
+          <!-- Chapter Badge -->
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div class="badge badge-primary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+              📖 ${lesson.chapter}
             </div>
-            
-            <h1 class="title-font" style="font-size: 2.5rem; color: #111827; line-height: 1.2;">
-              ${lesson.title}
-            </h1>
-            
-            ${isCompleted ? `
-              <div style="
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                background: rgba(16, 185, 129, 0.1);
-                color: #047857;
-                padding: 0.25rem 0.75rem;
-                border-radius: 9999px;
-                font-size: 0.875rem;
-                font-weight: 500;
-              ">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Aula concluída</span>
-              </div>
-            ` : ''}
-          </header>
+          </div>
+
+          <!-- Title -->
+          <h1 style="
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+          ">
+            ${lesson.title}
+          </h1>
 
           <!-- Content -->
-          <article style="
+          <div style="
             font-size: 1.125rem;
+            line-height: 1.8;
             color: #374151;
-            line-height: 1.7;
+            margin-bottom: 3rem;
             text-align: justify;
-            margin-bottom: 2rem;
           ">
-            <p>${lesson.content}</p>
-          </article>
+            ${lesson.content}
+          </div>
 
-          <!-- Footer -->
-          <footer style="padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+          <!-- Action Button -->
+          <div style="text-align: center; margin-bottom: 2rem;">
+            <button 
+              data-lesson-id="${lesson.id}"
+              class="btn btn-primary ${isCompleted ? 'completed' : ''}"
+              style="
+                font-size: 1rem;
+                padding: 0.75rem 2rem;
+                min-width: 200px;
+                ${isCompleted ? 'background: #10b981; border-color: #10b981;' : ''}
+              "
+            >
+              ${isCompleted ? '✓ Marcado como Lido' : `Marcar como Lido (+${lesson.points} pontos)`}
+            </button>
+          </div>
+
+          <!-- Call to Action -->
+          <div style="
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+          ">
+            <h3 style="
+              font-size: 1.125rem;
+              font-weight: 600;
+              color: #1e40af;
+              margin-bottom: 0.75rem;
+            ">
+              Pronta para a prática?
+            </h3>
+            <p style="
+              color: #4b5563;
+              margin-bottom: 1.5rem;
+              font-size: 0.875rem;
+            ">
+              Agora que você aprendeu o conceito, vamos aplicar no seu dia a dia.
+            </p>
             
-            <!-- Toggle Button -->
-            <div class="text-center" style="margin-bottom: 2rem;">
-              <button 
-                id="lesson-toggle-btn"
-                class="btn ${isCompleted ? 'btn-secondary' : 'btn-primary'}"
-                style="padding: 0.75rem 1.5rem; font-size: 1rem;"
-                data-lesson-id="${lessonId}"
-                data-points="${lesson.points}"
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              <a href="#/Checklists" class="btn btn-outline" style="min-width: 140px;">
+                ✅ Ir para o Checklist
+              </a>
+              
+              <a 
+                href="https://gamma.app/docs/O-Hormonio-Secreto-que-Pode-Mudar-Tudo-Seu-Guia-para-o-Emagrecime-iefsqtua7o3aeg6?mode=doc" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="btn btn-secondary"
+                style="min-width: 140px;"
               >
-                <span class="spinner hidden" style="margin-right: 0.5rem;">
-                  <div style="width: 20px; height: 20px; border: 2px solid #e5e7eb; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                </span>
-                <span class="btn-icon">
-                  ${isCompleted ? 
-                    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
-                      <line x1="18" x2="6" y1="6" y2="18"/>
-                      <line x1="6" x2="18" y1="6" y2="18"/>
-                    </svg>` :
-                    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
-                      <polyline points="20,6 9,17 4,12"/>
-                    </svg>`
-                  }
-                </span>
-                <span class="btn-text">
-                  ${isCompleted 
-                    ? `Desfazer Leitura (−${lesson.points} pontos)` 
-                    : `Marcar como Lido (+${lesson.points} pontos)`
-                  }
-                </span>
-              </button>
+                📖 Ver no Gamma
+              </a>
             </div>
-
-            <!-- Call to Action -->
-            <div class="text-center space-y-4">
-              <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem;">
-                Pronta para a prática?
-              </h3>
-              <p style="color: #4b5563; margin-bottom: 1.5rem;">
-                Agora que você aprendeu o conceito, vamos aplicar no seu dia a dia.
-              </p>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center;">
-                <a href="#/Checklists?checklist=${lesson.checklistType}" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.75rem;">
-                    <polyline points="9,11 12,14 22,4"/>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                  </svg>
-                  Ir para o Checklist
-                </a>
-                
-                <button 
-                  onclick="window.open('https://gamma.app/docs/O-Hormonio-Secreto-que-Pode-Mudar-Tudo-Seu-Guia-para-o-Emagrecime-iefsqtua7o3aeg6?mode=doc', '_blank')"
-                  class="btn btn-outline"
-                  style="padding: 0.75rem 1.5rem;"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                    <polyline points="15,3 21,3 21,9"/>
-                    <line x1="10" x2="21" y1="14" y2="3"/>
-                  </svg>
-                  Ver no Gamma
-                </button>
-              </div>
-            </div>
-          </footer>
+          </div>
         </div>
-        
       </div>
     </div>
-    
-    <script>
-      // Setup lesson toggle
-      document.addEventListener('click', async (e) => {
-        if (e.target.closest('#lesson-toggle-btn')) {
-          const button = e.target.closest('#lesson-toggle-btn');
-          const lessonId = button.dataset.lessonId;
-          const points = parseInt(button.dataset.points);
-          
-          // Prevenir múltiplos cliques
-          if (button.disabled) return;
-          
-          try {
-            // Mostrar loading
-            button.disabled = true;
-            const spinner = button.querySelector('.spinner');
-            const icon = button.querySelector('.btn-icon');
-            const text = button.querySelector('.btn-text');
-            
-            spinner.classList.remove('hidden');
-            icon.style.opacity = '0';
-            
-            // Toggle lesson
-            const newState = await window.glp1State.toggleLessonRead(lessonId);
-            
-            // Atualizar UI
-            updateLessonUI(button, newState, points);
-            
-            // Mostrar toast
-            window.showToast(
-              newState ? \`Marcada como lida (+\${points} pontos)\` : \`Leitura desfeita (−\${points} pontos)\`,
-              newState ? 'success' : 'info'
-            );
-            
-            // Atualizar stats na Home
-            if (window.refreshHomeStats) {
-              window.refreshHomeStats();
-            }
-            
-          } catch (error) {
-            console.error('Erro ao toggle lesson:', error);
-            window.showToast(error.message, 'error');
-          } finally {
-            // Esconder loading
-            setTimeout(() => {
-              button.disabled = false;
-              const spinner = button.querySelector('.spinner');
-              const icon = button.querySelector('.btn-icon');
-              spinner.classList.add('hidden');
-              icon.style.opacity = '1';
-            }, 500);
-          }
-        }
-      });
-      
-      function updateLessonUI(button, isCompleted, points) {
-        const icon = button.querySelector('.btn-icon');
-        const text = button.querySelector('.btn-text');
-        
-        // Atualizar classe do botão
-        if (isCompleted) {
-          button.classList.remove('btn-primary');
-          button.classList.add('btn-secondary');
-        } else {
-          button.classList.remove('btn-secondary');
-          button.classList.add('btn-primary');
-        }
-        
-        // Atualizar ícone
-        icon.innerHTML = isCompleted ? 
-          \`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
-            <line x1="18" x2="6" y1="6" y2="18"/>
-            <line x1="6" x2="18" y1="6" y2="18"/>
-          </svg>\` :
-          \`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
-            <polyline points="20,6 9,17 4,12"/>
-          </svg>\`;
-        
-        // Atualizar texto
-        text.textContent = isCompleted 
-          ? \`Desfazer Leitura (−\${points} pontos)\`
-          : \`Marcar como Lido (+\${points} pontos)\`;
-      }
-    </script>
   `;
 }
 
